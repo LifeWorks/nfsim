@@ -501,6 +501,17 @@ int DORRxnClass::getCorrectedReactantCount(unsigned int reactantIndex) const
 			 : reactantLists[reactantIndex]->size();
 }
 
+double DORRxnClass::getScaledReactantCount(unsigned int reactantIndex, double scaling) const
+{
+	if(reactantIndex==(unsigned)this->DORreactantIndex) {
+		return (double)(reactantTree->size()) / scaling;
+	}
+	return isPopulationType[reactantIndex] ?
+        std::max( (double)(reactantLists[reactantIndex]->getPopulation()) / scaling
+			             - (double)identicalPopCountCorrection[reactantIndex], 0.0 )
+        : (double)(reactantLists[reactantIndex]->size()) / scaling;
+}
+
 /*
 JJT: this function is called if the default mappingset information is sending the wrong parameter to the local function when using a species
 scope label. for now the solution is to try every molecule referenced by the mapping set. This may be inefficient but it will only be as long
@@ -603,6 +614,52 @@ double DORRxnClass::update_a() {
 			a*=reactantTree->getRateFactorSum();
 		}
 	}
+	return a;
+}
+
+double DORRxnClass::update_a_scaled(double scalelevel) {
+    double upperLimit = scalelevel * 2.0;
+    double tempPop = 0.0;
+    double minPop = 0.0;
+    double scalingExp = 0.0;
+    double scaling = 1.0;
+
+    if (n_reactants > 0) {
+        minPop = (double) getCorrectedReactantCount(0);
+        if (minPop < upperLimit ) {
+            minPop = scalelevel;
+        } else {
+            for(unsigned int i=1; i<n_reactants; i++) {
+                tempPop = getReactantCount(i);
+                if(tempPop < minPop) {
+                    minPop = tempPop;
+                    if (minPop < upperLimit) {
+                        minPop = scalelevel;
+                        break;
+                    }
+                }
+            }
+        }
+        scaling = floor(minPop / scalelevel);
+    } else {
+        scaling = scalelevel;
+    }
+    if (scaling < 2.0) {
+        scaling = 1.0;
+    }
+    setScalingFactor(scaling);
+
+	a = baseRate;
+	for(unsigned int i=0; i<n_reactants; i++) {
+		if(i!=DORreactantIndex) {
+            scalingExp += 1.0;
+			a*=getScaledReactantCount(i,scaling);
+		} else {
+			a*=reactantTree->getRateFactorSum();
+		}
+	}
+    a *= pow(scaling, scalingExp - 1);
+
 	return a;
 }
 
@@ -1134,6 +1191,21 @@ int DOR2RxnClass::getCorrectedReactantCount(unsigned int reactantIndex) const
 }
 
 
+double DORRxnClass::getScaledReactantCount(unsigned int reactantIndex, double scaling) const
+{
+	if (reactantIndex==(unsigned)this->DORreactantIndex1) {
+		return (double)(reactantTree1->size()) / scaling;
+	}
+	else if (reactantIndex==(unsigned)DORreactantIndex2) {
+		return (double)(reactantTree2->size()) / scaling;
+	}
+	return isPopulationType[reactantIndex] ?
+        std::max( (double)(reactantLists[reactantIndex]->getPopulation()) / scaling
+			             - (double)identicalPopCountCorrection[reactantIndex], 0.0 )
+        : (double)(reactantLists[reactantIndex]->size()) / scaling;
+}
+
+
 
 //This function takes a given mappingset and looks up the value of its local
 //functions based on the local functions that were defined
@@ -1227,6 +1299,63 @@ double DOR2RxnClass::update_a() {
 			//cout << i << ":ReactantCount=" << (double)getCorrectedReactantCount(i) << endl;
 		}
 	}
+	//cout << "update_a=" << a << endl;
+	return a;
+}
+
+
+double DOR2RxnClass::update_a_scaled(double scalelevel) {
+    double upperLimit = scalelevel * 2.0;
+    double tempPop = 0.0;
+    double minPop = 0.0;
+    double scalingExp = 0.0;
+    double scaling = 1.0;
+
+    if (n_reactants > 0) {
+        minPop = (double) getCorrectedReactantCount(0);
+        if (minPop < upperLimit ) {
+            minPop = scalelevel;
+        } else {
+            for(unsigned int i=1; i<n_reactants; i++) {
+                tempPop = getReactantCount(i);
+                if(tempPop < minPop) {
+                    minPop = tempPop;
+                    if (minPop < upperLimit) {
+                        minPop = scalelevel;
+                        break;
+                    }
+                }
+            }
+        }
+        scaling = floor(minPop / scalelevel);
+    } else {
+        scaling = scalelevel;
+    }
+    if (scaling < 2.0) {
+        scaling = 1.0;
+    }
+    setScalingFactor(scaling);
+
+	a = baseRate;
+	//cout << "> DOR2RxnClass::update_a()" << endl;
+	//cout << "baseRate=" << baseRate << endl;
+	for (unsigned int i=0; i<n_reactants; i++) {
+		if (i==(unsigned int)DORreactantIndex1) {
+			a*=reactantTree1->getRateFactorSum();
+			//cout << i << ":rateFactorSum1=" << reactantTree1->getRateFactorSum() << endl;
+		}
+		else if (i==(unsigned int)DORreactantIndex2) {
+			a*=reactantTree2->getRateFactorSum();
+			//cout << i << ":rateFactorSum2=" << reactantTree2->getRateFactorSum() << endl;
+		}
+		else {
+            scalingExp += 1.0;
+			a*=getScaledReactantCount(i,scaling);
+			//cout << i << ":ReactantCount=" << (double)getCorrectedReactantCount(i) << endl;
+		}
+	}
+    a *= pow(scaling, scalingExp - 1);
+
 	//cout << "update_a=" << a << endl;
 	return a;
 }

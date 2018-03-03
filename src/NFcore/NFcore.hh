@@ -228,6 +228,12 @@ namespace NFcore
 			System(string name, bool useComplex, int globalMoleculeLimit);
 
 			/*!
+				creates a system that keeps track of complex formation if
+				the setComplex parameter is set to true
+			*/
+            System(string name, bool useComplex, int globalMoleculeLimit, double scalelevel);
+
+			/*!
 				 destroys the system and cleans up all memory associated with it
 			 */
 			~System();
@@ -238,6 +244,7 @@ namespace NFcore
 			bool isOutputtingBinary() { return useBinaryOutput; };
 			double getCurrentTime() const { return current_time; };
 			int getGlobalMoleculeLimit() const { return globalMoleculeLimit; };
+            double getScalelevel() const { return scalelevel; }
 
 			int getMolObsCount(int moleculeTypeIndex, int observableIndex) const;
 			Observable * getObservableByName(string obsName);
@@ -419,6 +426,8 @@ namespace NFcore
 		    bool outputEventCounter; /*< set to true to output the cumulative number of events at each output step */
 
 		    int globalEventCounter;
+
+            double scalelevel; /* The scaling target set for NFsim */
 
 		    ///////////////////////////////////////////////////////////////////////////
 			// The container objects that maintain the core system configuration
@@ -1103,12 +1112,15 @@ namespace NFcore
 
 			virtual int getReactantCount(unsigned int reactantIndex) const = 0;
 			virtual int getCorrectedReactantCount(unsigned int reactantIndex) const = 0;
+            virtual double getScaledReactantCount(unsigned int reactantIndex, double scaling) const = 0;
 			virtual void printFullDetails() const = 0;
 
 
 			void setRxnId(int rxnId) { this->rxnId = rxnId; };
 			int getRxnId() const { return rxnId; };
 
+			double getScalingFactor() const { return scalingFactor; };
+			void setScalingFactor(double scalingFactor) { this->scalingFactor = scalingFactor; };
 
 			void turnOff_OnTheFlyObs() { onTheFlyObservables=false; };
 
@@ -1140,6 +1152,7 @@ namespace NFcore
 			double baseRate;
 			string baseRateParameterName;
 			double a;
+            double scalingFactor;
 			unsigned int fireCounter;
 
 			unsigned int traversalLimit;

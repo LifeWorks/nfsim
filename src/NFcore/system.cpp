@@ -31,7 +31,11 @@ System::System(string name)
 
 	this->outputGlobalFunctionValues=false;
 	this->globalMoleculeLimit = 100000;
+
+    this->scalelevel=0.0;
+
 	rxnIndexMap=0;
+    scalelevel=0.0;
 	useBinaryOutput=false;
 	outputEventCounter=false;
 	globalEventCounter=0;
@@ -58,6 +62,8 @@ System::System(string name, bool useComplex)
 	this->outputGlobalFunctionValues=false;
 	this->globalMoleculeLimit = 100000;
 
+    this->scalelevel=0.0;
+
 	rxnIndexMap=0;
 	useBinaryOutput=false;
 	onTheFlyObservables=true;
@@ -82,6 +88,37 @@ System::System(string name, bool useComplex, int globalMoleculeLimit)
 
 	this->globalMoleculeLimit=globalMoleculeLimit;
 	this->outputGlobalFunctionValues=false;
+
+    this->scalelevel=0.0;
+
+	rxnIndexMap=0;
+	useBinaryOutput=false;
+	outputEventCounter=false;
+	globalEventCounter=0;
+	onTheFlyObservables=true;
+	universalTraversalLimit=-1;
+	ds=0;
+	selector = 0;
+	csvFormat = false;
+}
+
+
+
+System::System(string name, bool useComplex, int globalMoleculeLimit, double scalelevel)
+{
+	this->name = name;
+	this->a_tot = 0;
+	current_time = 0;
+	nextReaction = 0;
+	this->useComplex = useComplex;  // NETGEN -- is this needed?
+	// NETGEN
+	allComplexes.setSystem( this );
+	allComplexes.setUseComplex( useComplex );
+
+	this->globalMoleculeLimit=globalMoleculeLimit;
+	this->outputGlobalFunctionValues=false;
+
+    this->scalelevel=scalelevel;
 
 	rxnIndexMap=0;
 	useBinaryOutput=false;

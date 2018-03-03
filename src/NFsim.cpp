@@ -378,13 +378,21 @@ System *initSystemFromFlags(map<string,string> argMap, bool verbose)
 				globalMoleculeLimit = NFinput::parseAsInt(argMap,"gml",globalMoleculeLimit);
 			}
 
+			double scalelevel = 0.0;
+			if (argMap.find("scalelevel")!=argMap.end()) {
+				scalelevel = rint(NFinput::parseAsDouble(argMap,"scalelevel",scalelevel));
+			}
+
 			//Actually create the system
 			bool cb = false;
 			if(turnOnComplexBookkeeping || blockSameComplexBinding) cb=true;
 			int suggestedTraveralLimit = ReactionClass::NO_LIMIT;
-			System *s = NFinput::initializeFromXML(filename,cb,globalMoleculeLimit,verbose,
-													suggestedTraveralLimit,evaluateComplexScopedLocalFunctions);
-
+            if (scalelevel < 2.0) {
+                scalelevel = 0.0;
+                System *s = NFinput::initializeFromXML(filename,cb,globalMoleculeLimit,verbose,
+                                                       suggestedTraveralLimit,evaluateComplexScopedLocalFunctions,
+                                                       scalelevel);
+            }
 
 			if(s!=NULL)
 			{

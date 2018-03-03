@@ -67,6 +67,19 @@ namespace NFinput {
 			int &suggestedTraversalLimit,
 			bool evaluateComplexScopedLocalFunctions=false );
 
+	//! Maintains information about a component of a TemplateMolecule.
+	/*!
+    	@author Michael Sneddon
+	 */
+	System * initializeFromXML(
+			string filename,
+			bool blockSameComplexBinding,
+			int globalMoleculeLimit,
+			bool verbose,
+			int &suggestedTraversalLimit,
+			bool evaluateComplexScopedLocalFunctions=false,
+            double scalelevel);
+
 	//! Reads the parameter XML block and puts them in the parameter map.
 	/*!
     	@author Michael Sneddon
