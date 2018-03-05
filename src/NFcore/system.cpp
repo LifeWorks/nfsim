@@ -604,7 +604,7 @@ void System::update_A_tot(ReactionClass *r, double old_a, double new_a)
 
 double System::recompute_A_tot()
 {
-	a_tot = selector->refactorPropensities();
+    a_tot = selector->refactorPropensities();
 	return a_tot;
 
 
@@ -628,12 +628,13 @@ double System::recompute_A_tot()
 double System::getNextRxn()
 {
 	nextReaction = 0;
-	double x = selector->getNextReactionClass(nextReaction);
+    double x = selector->getNextReactionClass(nextReaction);
 	if((int)x==-1) {
 		this->printAllReactions();
 		exit(1);
 	}
-	return selector->getNextReactionClass(nextReaction);
+	// return selector->getNextReactionClass(nextReaction);
+	return x;
 
 
 //  BUILT IN DIRECT SEARCH
@@ -762,7 +763,20 @@ double System::sim(double duration, long int sampleTimes, bool verbose)
 		current_time+=delta_t;
 
 		//5: Fire Reaction! (takes care of updates to lists and observables)
-		nextReaction->fire(randElement);
+        if (scalelevel < 2.0) {
+            nextReaction->fire(randElement);
+        } else {
+            nextReaction->fire(randElement);
+            double scaling = nextReaction->getScalingFactor();
+            if (scaling > 1.0) {
+                double counterTemp = 1.0;
+                double randElementTemp = 1.0;
+                while (counterTemp < scaling)
+                    randElementTemp = NFutil::RANDOM(randElement);
+                    nextReaction->fire(randElementTemp);
+                    counterTemp += 1.0;
+            }
+        }
 		//this->printAllObservableCounts(this->current_time);
 		//cout<<"\n---"<<endl;
 

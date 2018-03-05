@@ -80,117 +80,17 @@ double FunctionalRxnClass::update_a() {
 	}
 
 
-	// check here for the total rate flag - if this is set to true, then
-	// use the rate exactly as given by the function, but if it is false,
-	// then we have to multiply here by the reactant counts
-	if(!this->totalRateFlag) {
-		for(unsigned int i=0; i<n_reactants; i++)
-			a*=(double)getCorrectedReactantCount(i);
-	}
-	else
-	{
-		// Check that we have at least one set of reactants!
-		for(unsigned int i=0; i<n_reactants; i++) {
-			if(getCorrectedReactantCount(i)==0) {
-				a=0.0;
-				break;
-				//cout<<"Warning!  Function evaluates to positive rate for a reaction, but"<<endl;
-				//cout<<"one of the reactant lists is empty!"<<endl;
-				//this->printDetails();
-				//cf->printDetails(reactantTemplates[0]->getMoleculeType()->getSystem());
-				//exit(1);
-			}
-		}
-	}
-	
-	return a;
-}
-
-double FunctionalRxnClass::update_a_scaled(double scalelevel) {
-    double upperLimit = scalelevel * 2.0;
-    double tempPop = 0.0;
-    double minPop = 0.0;
-    double scalingExp = 0.0;
-    double scaling = 1.0;
-
-	//cout<<"udpating a"<<endl;
-	if(this->onTheFlyObservables==false) {
-		cerr<<"Warning!!  You have on the fly observables turned off, but you are using functional\n";
-		cerr<<"reactions which depend on observables.  Therefore, you cannot turn off onTheFlyObservables!\n";
-		cerr<<"exiting now."<<endl;
-		exit(1);
-	}
-
-    if (n_reactants > 0) {
-        minPop = (double) getCorrectedReactantCount(0);
-        if (minPop < upperLimit ) {
-            minPop = scalelevel;
+    if (scalelevel < 2.0) {
+        // check here for the total rate flag - if this is set to true, then
+        // use the rate exactly as given by the function, but if it is false,
+        // then we have to multiply here by the reactant counts
+        if(!this->totalRateFlag) {
+            for(unsigned int i=0; i<n_reactants; i++)
+                a*=(double)getCorrectedReactantCount(i);
         } else {
-            for(unsigned int i=1; i<n_reactants; i++) {
-                tempPop = getCorrectedReactantCount(i);
-                if(tempPop < minPop) {
-                    minPop = tempPop;
-                    if (minPop < upperLimit) {
-                        minPop = scalelevel;
-                        break;
-                    }
-                }
-            }
-        }
-        scaling = floor(minPop / scalelevel);
-    } else {
-        scaling = scalelevel;
-    }
-    if (scaling < 2.0) {
-        scaling = 1.0;
-    }
-    setScalingFactor(scaling);
-
-	//	cout<<"here"<<endl;
-	if(gf!=0) {
-	//	cout<<"in here"<<endl;
-		a=FuncFactory::Eval(gf->p);
-	} else if(cf!=0) {
-		int * reactantCounts = new int[this->n_reactants];
-		for(unsigned int r=0; r<n_reactants; r++) {
-			reactantCounts[r] = (int)getReactantCount(r);
-		}
-		a=cf->evaluateOn(0,0, reactantCounts, n_reactants);
-		delete [] reactantCounts;
-	//	cout<<"and here"<<endl;
-	} else {
-		cout<<"Error!  Functional rxn is not properly initialized, but is being used!"<<endl;
-		exit(1);
-	}
-
-	if(a<0) {
-		cout<<"Warning!!  The function you provided for functional rxn: '"<<name<<"' evaluates\n";
-		cout<<"to a value less than zero!  You cannot have a negative propensity!";
-		cout<<"here is the offending function: \n";
-		gf->printDetails();
-		cout<<"\nhere is the offending reaction: \n";
-		this->printDetails();
-		cout<<"\n\nquitting."<<endl;
-		exit(1);
-	}
-
-
-	// check here for the total rate flag - if this is set to true, then
-	// use the rate exactly as given by the function, but if it is false,
-	// then we have to multiply here by the reactant counts
-	if(!this->totalRateFlag) {
-		for(unsigned int i=0; i<n_reactants; i++) {
-            a*=getScaledReactantCount(i,scaling);
-            scalingExp += 1.0;
-        }
-        a*=baseRate * pow(scaling, scalingExp - 1);
-	}
-	else
-	{
-        if (n_reactants > 0) {
             // Check that we have at least one set of reactants!
             for(unsigned int i=0; i<n_reactants; i++) {
-                if(getScaledReactantCount(i,scaling) < 1.0) {
+                if(getCorrectedReactantCount(i)==0) {
                     a=0.0;
                     break;
                     //cout<<"Warning!  Function evaluates to positive rate for a reaction, but"<<endl;
@@ -200,13 +100,69 @@ double FunctionalRxnClass::update_a_scaled(double scalelevel) {
                     //exit(1);
                 }
             }
-        } else {
-            a *= scaling;
         }
-	}
+    } else {
+        double upperLimit = scalelevel * 2.0;
+        double tempPop = 0.0;
+        double minPop = 0.0;
+        double scalingExp = 0.0;
+        double scaling = 1.0;
 
+        if (n_reactants > 0) {
+            minPop = (double) getCorrectedReactantCount(0);
+            if (minPop < upperLimit ) {
+                minPop = scalelevel;
+            } else {
+                for(unsigned int i=1; i<n_reactants; i++) {
+                    tempPop = getCorrectedReactantCount(i);
+                    if(tempPop < minPop) {
+                        minPop = tempPop;
+                        if (minPop < upperLimit) {
+                            minPop = scalelevel;
+                            break;
+                        }
+                    }
+                }
+            }
+            scaling = floor(minPop / scalelevel);
+        } else {
+            scaling = scalelevel;
+        }
+        if (scaling < 2.0) {
+            scaling = 1.0;
+        }
+        setScalingFactor(scaling);
+        // check here for the total rate flag - if this is set to true, then
+        // use the rate exactly as given by the function, but if it is false,
+        // then we have to multiply here by the reactant counts
+        if(!this->totalRateFlag) {
+            for(unsigned int i=0; i<n_reactants; i++) {
+                a*=getScaledReactantCount(i,scaling);
+                scalingExp += 1.0;
+            }
+            a*=baseRate * pow(scaling, scalingExp - 1);
+        } else {
+            if (n_reactants > 0) {
+                // Check that we have at least one set of reactants!
+                for(unsigned int i=0; i<n_reactants; i++) {
+                    if(getScaledReactantCount(i,scaling) < 1.0) {
+                        a=0.0;
+                        break;
+                        //cout<<"Warning!  Function evaluates to positive rate for a reaction, but"<<endl;
+                        //cout<<"one of the reactant lists is empty!"<<endl;
+                        //this->printDetails();
+                        //cf->printDetails(reactantTemplates[0]->getMoleculeType()->getSystem());
+                        //exit(1);
+                    }
+                }
+            } else {
+                a *= scaling;
+            }
+        }
+    }
 	return a;
 }
+
 
 void FunctionalRxnClass::printDetails() const {
 
@@ -261,30 +217,28 @@ MMRxnClass::~MMRxnClass() {};
 
 double MMRxnClass::update_a()
 {
-	double S = (double)getCorrectedReactantCount(0);
-	double E = (double)getCorrectedReactantCount(1);
-	sFree=0.5*( (S-Km-E) + pow((pow( (S-Km-E),2.0) + 4.0*Km*S),  0.5) );
-	a=kcat*sFree*E/(Km+sFree);
-	return a;
-}
-
-double MMRxnClass::update_a(double scalelevel)
-{
-    double upperLimit = scalelevel * 2.0;
-	double S = (double)getCorrectedReactantCount(0);
-	double E = (double)getCorrectedReactantCount(1);
-    double minPop = min(S, E);
-    double scaling = 1.0;
-
-    if (minPop < upperLimit) {
-        scaling = 1.0;
+    if (scalelevel < 2.0) {
+        double S = (double)getCorrectedReactantCount(0);
+        double E = (double)getCorrectedReactantCount(1);
+        sFree=0.5*( (S-Km-E) + pow((pow( (S-Km-E),2.0) + 4.0*Km*S),  0.5) );
+        a=kcat*sFree*E/(Km+sFree);
     } else {
-        scaling = floor(minPop / scalelevel);
+        double upperLimit = scalelevel * 2.0;
+        double S = (double)getCorrectedReactantCount(0);
+        double E = (double)getCorrectedReactantCount(1);
+        double minPop = min(S, E);
+        double scaling = 1.0;
+
+        if (minPop < upperLimit) {
+            scaling = 1.0;
+        } else {
+            scaling = floor(minPop / scalelevel);
+        }
+        setScalingFactor(scaling);
+        double b = (S-Km-E) / scaling;
+        sFree=0.5*( b + pow((pow(b,2.0) + 4.0 * Km / scaling * S / scaling),  0.5) );
+        a=kcat * sFree * E / scaling /(Km / scaling + sFree);
     }
-    setScalingFactor(scaling);
-    double b = (S-Km-E) / scaling;
-	sFree=0.5*( b + pow((pow(b,2.0) + 4.0 * Km / scaling * S / scaling),  0.5) );
-	a=kcat * sFree * E / scaling /(Km / scaling + sFree);
 	return a;
 }
 
@@ -522,79 +476,77 @@ void BasicRxnClass::notifyRateFactorChange(Molecule * m, int reactantIndex, int 
 
 double BasicRxnClass::update_a()
 {
-	// Use the total rate law convention (macroscopic rate)
-	if(this->totalRateFlag) {
-		a=baseRate;
-		for(unsigned int i=0; i<n_reactants; i++)
-			if(getCorrectedReactantCount(i)==0) a=0.0;
+    if (scalelevel < 2.0) {
+        // Use the total rate law convention (macroscopic rate)
+        if(this->totalRateFlag) {
+            a=baseRate;
+            for(unsigned int i=0; i<n_reactants; i++)
+                if(getCorrectedReactantCount(i)==0) a=0.0;
 
-	// Use the standard microscopic rate
-	} else {
-		a = 1.0;
-		for(unsigned int i=0; i<n_reactants; i++) {
-			a*=getCorrectedReactantCount(i);
-		}
-		a*=baseRate;
-	}
-	return a;
-}
-
-
-double BasicRxnClass::update_a_scaled(double scalelevel)
-{
-    double upperLimit = scalelevel * 2.0;
-    double tempPop = 0.0;
-    double minPop = 0.0;
-    double scalingExp = 0.0;
-    double scaling = 1.0;
-
-    if (n_reactants > 0) {
-        minPop = (double) getCorrectedReactantCount(0);
-        if (minPop < upperLimit ) {
-            minPop = scalelevel;
+            // Use the standard microscopic rate
         } else {
-            for(unsigned int i=1; i<n_reactants; i++) {
-                tempPop = getReactantCount(i);
-                if(tempPop < minPop) {
-                    minPop = tempPop;
-                    if (minPop < upperLimit) {
-                        minPop = scalelevel;
-                        break;
+            a = 1.0;
+            for(unsigned int i=0; i<n_reactants; i++) {
+                a*=getCorrectedReactantCount(i);
+            }
+            a*=baseRate;
+        }
+    } else {
+        double upperLimit = scalelevel * 2.0;
+        double tempPop = 0.0;
+        double minPop = 0.0;
+        double scalingExp = 0.0;
+        double scaling = 1.0;
+
+        if (n_reactants > 0) {
+            minPop = (double) getCorrectedReactantCount(0);
+            if (minPop < upperLimit ) {
+                minPop = scalelevel;
+            } else {
+                for(unsigned int i=1; i<n_reactants; i++) {
+                    tempPop = getReactantCount(i);
+                    if(tempPop < minPop) {
+                        minPop = tempPop;
+                        if (minPop < upperLimit) {
+                            minPop = scalelevel;
+                            break;
+                        }
                     }
                 }
             }
-        }
-        scaling = floor(minPop / scalelevel);
-    } else {
-        scaling = scalelevel;
-    }
-    if (scaling < 2.0) {
-        scaling = 1.0;
-    }
-    setScalingFactor(scaling);
-	// Use the total rate law convention (macroscopic rate)
-	if(this->totalRateFlag) {
-        if (n_reactants > 0) {
-            a=baseRate / scaling;
-            for(unsigned int i=0; i<n_reactants; i++) {
-                if(getScaledReactantCount(i,scaling) < 1.0) {
-                    a=0.0;
-                    break;
-                }
-            }
+            scaling = floor(minPop / scalelevel);
         } else {
-            a=baseRate * scaling;
+            scaling = scalelevel;
         }
+        if (scaling < 2.0) {
+            scaling = 1.0;
+        }
+        setScalingFactor(scaling);
+        // Use the total rate law convention (macroscopic rate)
+        if(this->totalRateFlag) {
+            if (n_reactants > 0) {
+                a=baseRate / scaling;
+                for(unsigned int i=0; i<n_reactants; i++) {
+                    if(getScaledReactantCount(i,scaling) < 1.0) {
+                        a=0.0;
+                        break;
+                    }
+                }
+            } else {
+                a=baseRate * scaling;
+            }
 
-	// Use the standard microscopic rate
-	} else {
-		a = 1.0;
-        for(unsigned int i=0; i<n_reactants; i++) {
-            scalingExp += 1.0;
-            a*=getScaledReactantCount(i,scaling);
+            // Use the standard microscopic rate
+        } else {
+            a = 1.0;
+            for(unsigned int i=0; i<n_reactants; i++) {
+                scalingExp += 1.0;
+                a*=getScaledReactantCount(i,scaling);
+            }
+            a*=baseRate * pow(scaling, scalingExp - 1);
         }
-        a*=baseRate * pow(scaling, scalingExp - 1);
-	}
+    }
+
 	return a;
 }
 

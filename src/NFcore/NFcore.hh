@@ -1112,7 +1112,7 @@ namespace NFcore
 
 			virtual int getReactantCount(unsigned int reactantIndex) const = 0;
 			virtual int getCorrectedReactantCount(unsigned int reactantIndex) const = 0;
-            virtual double getScaledReactantCount(unsigned int reactantIndex, double scaling) const = 0;
+            // virtual double getScaledReactantCount(unsigned int reactantIndex, double scaling) const = 0;
 			virtual void printFullDetails() const = 0;
 
 
@@ -1152,6 +1152,7 @@ namespace NFcore
 			double baseRate;
 			string baseRateParameterName;
 			double a;
+            double scalelevel;
             double scalingFactor;
 			unsigned int fireCounter;
 

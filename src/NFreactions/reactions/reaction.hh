@@ -26,7 +26,6 @@ namespace NFcore
 			virtual bool tryToAdd(Molecule *m, unsigned int reactantPos);
 			virtual void remove(Molecule *m, unsigned int reactantPos);
 			virtual double update_a();
-			virtual double update_a_scaled(double scalelevel);
 			virtual void notifyRateFactorChange(Molecule * m, int reactantIndex, int rxnListIndex);
 			virtual int getReactantCount(unsigned int reactantIndex) const;
 			virtual int getCorrectedReactantCount(unsigned int reactantIndex) const;
@@ -53,7 +52,6 @@ namespace NFcore
 			virtual ~FunctionalRxnClass();
 
 			virtual double update_a();
-			virtual double update_a_scaled(double scalelevel);
 			virtual void printDetails() const;
 
 		protected:
@@ -68,7 +66,6 @@ namespace NFcore
 			virtual ~MMRxnClass();
 
 			virtual double update_a();
-			virtual double update_a_scaled(double scalelevel);
 			virtual void printDetails() const;
 
 		protected:
@@ -95,7 +92,6 @@ namespace NFcore
 			virtual bool tryToAdd(Molecule *m, unsigned int reactantPos);
 			virtual void remove(Molecule *m, unsigned int reactantPos);
 			virtual double update_a();
-			virtual double update_a_scaled(double scalelevel);
 
 			virtual int getDORreactantPosition() const { return DORreactantIndex; };
 
@@ -172,7 +168,6 @@ namespace NFcore
 			virtual bool tryToAdd(Molecule *m, unsigned int reactantPos);
 			virtual void remove(Molecule *m, unsigned int reactantPos);
 			virtual double update_a();
-			virtual double update_a_scaled(double scalelevel);
 
 			virtual int getDORreactantPosition()  const { return DORreactantIndex1; };
 			virtual int getDORreactantPosition2() const { return DORreactantIndex2; };

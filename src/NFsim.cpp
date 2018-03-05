@@ -389,10 +389,10 @@ System *initSystemFromFlags(map<string,string> argMap, bool verbose)
 			int suggestedTraveralLimit = ReactionClass::NO_LIMIT;
             if (scalelevel < 2.0) {
                 scalelevel = 0.0;
-                System *s = NFinput::initializeFromXML(filename,cb,globalMoleculeLimit,verbose,
-                                                       suggestedTraveralLimit,evaluateComplexScopedLocalFunctions,
-                                                       scalelevel);
             }
+            System *s = NFinput::initializeFromXML(filename,cb,globalMoleculeLimit,verbose,
+                                                   suggestedTraveralLimit,evaluateComplexScopedLocalFunctions,
+                                                   scalelevel);
 
 			if(s!=NULL)
 			{
