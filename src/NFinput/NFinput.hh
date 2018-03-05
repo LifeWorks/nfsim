@@ -65,18 +65,6 @@ namespace NFinput {
 			int globalMoleculeLimit,
 			bool verbose,
 			int &suggestedTraversalLimit,
-			bool evaluateComplexScopedLocalFunctions=false );
-
-	//! Maintains information about a component of a TemplateMolecule.
-	/*!
-    	@author Michael Sneddon
-	 */
-	System * initializeFromXML(
-			string filename,
-			bool blockSameComplexBinding,
-			int globalMoleculeLimit,
-			bool verbose,
-			int &suggestedTraversalLimit,
 			bool evaluateComplexScopedLocalFunctions=false,
             double scalelevel);
 
