@@ -1190,7 +1190,7 @@ int DOR2RxnClass::getCorrectedReactantCount(unsigned int reactantIndex) const
 }
 
 
-double DORRxnClass::getScaledReactantCount(unsigned int reactantIndex, double scaling) const
+double DOR2RxnClass::getScaledReactantCount(unsigned int reactantIndex, double scaling) const
 {
 	if (reactantIndex==(unsigned)this->DORreactantIndex1) {
 		return (double)(reactantTree1->size()) / scaling;
