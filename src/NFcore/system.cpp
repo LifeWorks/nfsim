@@ -773,7 +773,7 @@ double System::sim(double duration, long int sampleTimes, bool verbose)
                 double counterTemp = 1.0;
                 double randElementTemp = 0.0;
                 while (counterTemp < scaling) {
-                    randElementTemp = NFutil::RANDOM_OPEN(randElement);
+                    randElementTemp = NFutil::RANDOM(randElement);
                     nextReaction->fire(randElementTemp);
                     counterTemp += 1.0;
                     cout<<"Fired "<<counterTemp<<" times"<<endl;
