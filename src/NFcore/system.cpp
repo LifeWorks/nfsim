@@ -768,13 +768,15 @@ double System::sim(double duration, long int sampleTimes, bool verbose)
         } else {
             nextReaction->fire(randElement);
             double scaling = nextReaction->getScalingFactor();
+            cout<<"Fire: will fire "<<scaling - 1.0<<" times"<<endl;
             if (scaling > 1.0) {
                 double counterTemp = 1.0;
-                double randElementTemp = 1.0;
+                double randElementTemp = 0.0;
                 while (counterTemp < scaling)
-                    randElementTemp = NFutil::RANDOM(randElement);
+                    randElementTemp = NFutil::RANDOM_OPEN(randElement);
                     nextReaction->fire(randElementTemp);
                     counterTemp += 1.0;
+                    cout<<"Fired "<<counterTemp<<" times"<<endl;
             }
         }
 		//this->printAllObservableCounts(this->current_time);
