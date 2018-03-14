@@ -701,6 +701,8 @@ double System::sim(double duration, long int sampleTimes, bool verbose)
 	double end_time = current_time+duration;
 	tryToDump();
 
+    double totFiringNum = 0.0;
+
 	while(current_time<end_time)
 	{
 		//this->printAllObservableCounts(current_time);
@@ -768,6 +770,7 @@ double System::sim(double duration, long int sampleTimes, bool verbose)
         } else {
             nextReaction->fire(randElement);
             double scaling = nextReaction->getScalingFactor();
+            totFiringNum += scaling;
             // cout<<"Fire: will fire "<<scaling - 1.0<<" times"<<endl;
             if (scaling > 1.0) {
                 double counterTemp = 1.0;
@@ -804,11 +807,21 @@ double System::sim(double duration, long int sampleTimes, bool verbose)
 	finish = clock();
     time = (double(finish)-double(start))/CLOCKS_PER_SEC;
     if(verbose) cout<<"\n";
-    cout<<"   You just simulated "<< iteration <<" reactions in "<< time << "s\n";
-    cout<<"   ( "<<((double)iteration)/time<<" reactions/sec, ";
-    cout<<(time/((double)iteration))<<" CPU seconds/event )"<< endl;
-    cout<<"   Null events: "<< System::NULL_EVENT_COUNTER;
-    cout<<"   ("<<(time)/((double)iteration-(double)System::NULL_EVENT_COUNTER)<<" CPU seconds/non-null event )"<< endl;
+    if (scalelevel > 1.0) {
+        cout<<"   You just fired "<< totFiringNum <<" reactions and simulated "<< iteration <<" events in "<< time << "s\n";
+        cout<<"   ( "<<totFiringNum/time<<" reactions/sec, ";
+        cout<<((double)iteration)/time<<" events/sec, ";
+        cout<<(time/((double)iteration))<<" CPU seconds/event, "<< endl;
+        cout<<(time/totFiringNum)<<" CPU seconds/reaction )"<< endl;
+        cout<<"   Null events: "<< System::NULL_EVENT_COUNTER;
+        cout<<"   ("<<(time)/(totFiringNum-(double)System::NULL_EVENT_COUNTER)<<" CPU seconds/non-null event )"<< endl;
+    } else {
+        cout<<"   You just simulated "<< iteration <<" events in "<< time << "s\n";
+        cout<<"   ( "<<((double)iteration)/time<<" events/sec, ";
+        cout<<(time/((double)iteration))<<" CPU seconds/event )"<< endl;
+        cout<<"   Null events: "<< System::NULL_EVENT_COUNTER;
+        cout<<"   ("<<(time)/((double)iteration-(double)System::NULL_EVENT_COUNTER)<<" CPU seconds/non-null event )"<< endl;
+    }
 
 	cout.unsetf(ios::scientific);
 	return current_time;
